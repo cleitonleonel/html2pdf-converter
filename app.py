@@ -1,4 +1,4 @@
-from os import environ as env, getcwd, path
+from os import environ as env, getcwd, path, makedirs
 from werkzeug.utils import secure_filename
 from flask import Flask, request, redirect, send_file, render_template
 from api.pychromepdf import ChromePDF
@@ -7,6 +7,10 @@ BASE_DIR = getcwd()
 # CHROME_PATH = "/app/.apt/usr/bin/google-chrome-stable"
 CHROME_PATH = env.get('CHROME_PATH', '{}/bin/google-chrome-stable'.format(BASE_DIR))
 UPLOAD_FOLDER = 'media/uploads/'
+
+if not path.exists(path.join(BASE_DIR, UPLOAD_FOLDER)):
+    makedirs(path.join(BASE_DIR, UPLOAD_FOLDER))
+    makedirs(path.join(BASE_DIR, 'pdf'))
 
 app = Flask(__name__, template_folder='templates')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
