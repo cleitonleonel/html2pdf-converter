@@ -15,7 +15,8 @@ elif '/app' in BASE_DIR:
 
 if not path.exists(path.join(BASE_DIR, UPLOAD_FOLDER)):
     makedirs(path.join(BASE_DIR, UPLOAD_FOLDER))
-    makedirs(path.join(BASE_DIR, 'pdf'))
+    makedirs(path.join(BASE_DIR, DOWLOAD_FOLDER))
+    makedirs(path.join(BASE_DIR, 'downloads'))
 
 app = Flask(__name__, template_folder='templates')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -36,6 +37,34 @@ def generate_pdf(filepath):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return redirect('/upload')
+
+
+@app.route('/api/v1/upload', methods=['POST'])
+def upload_api():
+    if 'file' not in request.files:
+        print('no file')
+        return redirect(request.url)
+    file = request.files['file']
+    if file.filename == '':
+        print('no filename')
+        return redirect(request.url)
+    else:
+        filename = secure_filename(file.filename)
+        saved_file = path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(saved_file)
+        print("saved file successfully")
+        pdf = generate_pdf(saved_file)
+        if pdf:
+            filename = pdf
+        else:
+            return {
+                "result": False,
+                "object": [],
+                "message": "Erro ao gerar pdf."
+            }
+    file_path = DOWLOAD_FOLDER + filename
+
+    return send_file(file_path, as_attachment=True, attachment_filename=filename)
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -73,9 +102,9 @@ def download_file(filename):
 
 
 @app.route('/return-files/<filename>')
-def return_files_tut(filename):
+def return_files(filename):
     file_path = DOWLOAD_FOLDER + filename
-    return send_file(file_path, as_attachment=True, attachment_filename='')
+    return send_file(file_path, as_attachment=True, attachment_filename=filename)
 
 
 if __name__ == "__main__":
