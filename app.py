@@ -4,7 +4,7 @@ from flask import Flask, request, redirect, send_file, render_template
 from api.pychromepdf import ChromePDF
 
 BASE_DIR = getcwd()
-CHROME_PATH = env.get('CHROME_PATH', '{}/.apt/usr/bin/google-chrome-stable'.format(BASE_DIR))
+CHROME_PATH = env.get('CHROME_PATH', '{}/.apt/opt/google/chrome/chrome'.format(BASE_DIR))
 UPLOAD_FOLDER = 'media/uploads/'
 
 if not path.exists(path.join(BASE_DIR, UPLOAD_FOLDER)):
