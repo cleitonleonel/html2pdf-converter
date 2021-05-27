@@ -8,9 +8,9 @@ DOWLOAD_FOLDER = 'pdf/'
 
 BASE_DIR = getcwd()
 
-if 'home' in BASE_DIR:
+if '/home' in BASE_DIR:
     CHROME_PATH = "/usr/bin/google-chrome-stable"
-elif '.app' in BASE_DIR:
+elif '/app' in BASE_DIR:
     CHROME_PATH = env.get('CHROME_PATH', '{}/.apt/opt/google/chrome/chrome'.format(BASE_DIR))
 
 if not path.exists(path.join(BASE_DIR, UPLOAD_FOLDER)):
