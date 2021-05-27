@@ -3,9 +3,15 @@ from werkzeug.utils import secure_filename
 from flask import Flask, request, redirect, send_file, render_template
 from api.pychromepdf import ChromePDF
 
-BASE_DIR = getcwd()
-CHROME_PATH = env.get('CHROME_PATH', '{}/.apt/opt/google/chrome/chrome'.format(BASE_DIR))
 UPLOAD_FOLDER = 'media/uploads/'
+DOWLOAD_FOLDER = 'pdf/'
+
+BASE_DIR = getcwd()
+
+if 'home' in BASE_DIR:
+    CHROME_PATH = "/usr/bin/google-chrome-stable"
+elif '.app' in BASE_DIR:
+    CHROME_PATH = env.get('CHROME_PATH', '{}/.apt/opt/google/chrome/chrome'.format(BASE_DIR))
 
 if not path.exists(path.join(BASE_DIR, UPLOAD_FOLDER)):
     makedirs(path.join(BASE_DIR, UPLOAD_FOLDER))
@@ -13,6 +19,7 @@ if not path.exists(path.join(BASE_DIR, UPLOAD_FOLDER)):
 
 app = Flask(__name__, template_folder='templates')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['DOWNLOAD_FOLDER'] = DOWLOAD_FOLDER
 
 
 def generate_pdf(filepath):
@@ -21,9 +28,14 @@ def generate_pdf(filepath):
     pdf_name = f'{BASE_DIR}/pdf/{file_name}.pdf'
     with open(pdf_name, 'wb') as output_file:
         if cpdf.page_to_pdf(f'file://{BASE_DIR}/{filepath}', output_file):
-            return pdf_name
+            return f'{file_name}.pdf'
 
     return False
+
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    return redirect('/upload')
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -43,7 +55,6 @@ def upload_file():
             print("saved file successfully")
             pdf = generate_pdf(saved_file)
             if pdf:
-                print(pdf)
                 filename = pdf
             else:
                 return {
@@ -51,7 +62,7 @@ def upload_file():
                     "object": [],
                     "message": "Erro ao gerar pdf."
                 }
-            return redirect('/downloadfile/' + filename)
+            return redirect('/download/' + filename)
 
     return render_template('upload.html')
 
@@ -63,7 +74,7 @@ def download_file(filename):
 
 @app.route('/return-files/<filename>')
 def return_files_tut(filename):
-    file_path = UPLOAD_FOLDER + filename
+    file_path = DOWLOAD_FOLDER + filename
     return send_file(file_path, as_attachment=True, attachment_filename='')
 
 
